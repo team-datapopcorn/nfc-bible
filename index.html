@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>오늘의 말씀 — NFC Bible</title>
+<meta name="description" content="NFC 태그로 만나는 오늘의 성경말씀. 랜덤 성경구절을 받아보세요."/>
+<meta property="og:title" content="오늘의 말씀 — NFC Bible"/>
+<meta property="og:description" content="NFC 태그로 만나는 오늘의 성경말씀"/>
+<meta property="og:type" content="website"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.4/kakao.min.js" crossorigin="anonymous"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --primary:#0df20d;
+  --primary-dark:#0ac50a;
+  --accent:#FFE156;
+  --black:#000;
+  --white:#fff;
+  --bg:#f0f0e8;
+  --card-bg:#fff;
+  --text:#111;
+  --border:3px solid var(--black);
+  --shadow-green:6px 6px 0 var(--primary);
+  --shadow-black:4px 4px 0 var(--black);
+  --shadow-white:4px 4px 0 var(--white);
+  --radius:12px;
+  --font-title:'Black Han Sans',sans-serif;
+  --font-body:'Noto Sans KR',sans-serif;
+}
+html{font-size:16px;-webkit-tap-highlight-color:transparent}
+body{
+  font-family:var(--font-body);
+  background:var(--bg);
+  color:var(--text);
+  min-height:100dvh;
+  display:flex;
+  justify-content:center;
+  overflow-x:hidden;
+  background-image:radial-gradient(var(--primary) 1px,transparent 1px);
+  background-size:24px 24px;
+}
+#app{
+  width:100%;max-width:430px;min-height:100dvh;
+  display:flex;flex-direction:column;
+  padding:20px 16px env(safe-area-inset-bottom,20px);
+  position:relative;
+}
+/* HEADER */
+.header{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:20px;position:relative;z-index:10;
+}
+.brand{
+  font-family:var(--font-title);font-size:1.4rem;
+  color:var(--black);letter-spacing:-0.5px;
+  background:var(--primary);border:var(--border);
+  padding:6px 14px;border-radius:8px;
+  box-shadow:var(--shadow-black);
+  transform:rotate(-1deg);
+}
+.user-btn{
+  background:var(--black);color:var(--primary);
+  border:2px solid var(--primary);
+  padding:8px 14px;border-radius:8px;
+  font-weight:700;font-size:0.85rem;
+  cursor:pointer;box-shadow:var(--shadow-green);
+  display:flex;align-items:center;gap:6px;
+  transition:all .15s;font-family:var(--font-body);
+}
+.user-btn:active{transform:translate(4px,4px);box-shadow:none}
+.user-btn .material-icons{font-size:18px}
+/* VERSE CARD */
+.verse-section{
+  flex:1;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;
+  position:relative;z-index:10;
+}
+.verse-card{
+  width:100%;background:var(--card-bg);
+  border:3px solid var(--black);border-radius:var(--radius);
+  padding:28px 24px 32px;
+  box-shadow:8px 8px 0 var(--primary);
+  position:relative;transform:rotate(-0.8deg);
+  transition:transform .3s,opacity .3s;
+}
+.verse-card.flip{animation:cardFlip .5s ease}
+@keyframes cardFlip{
+  0%{transform:rotate(-0.8deg) scale(1);opacity:1}
+  40%{transform:rotate(1deg) scale(0.92);opacity:0}
+  60%{transform:rotate(-2deg) scale(0.92);opacity:0}
+  100%{transform:rotate(-0.8deg) scale(1);opacity:1}
+}
+.verse-ref{
+  display:inline-block;
+  background:var(--black);color:var(--white);
+  font-size:0.75rem;font-weight:700;
+  padding:4px 12px;border-radius:20px;
+  border:2px solid var(--primary);
+  letter-spacing:1px;text-transform:uppercase;
+  margin-bottom:20px;
+}
+.verse-text{
+  font-family:var(--font-title);
+  font-size:clamp(1.6rem,6vw,2.2rem);
+  color:var(--black);text-align:center;
+  line-height:1.5;word-break:keep-all;
+  min-height:120px;display:flex;align-items:center;justify-content:center;
+}
+.verse-deco-circle{
+  position:absolute;bottom:-14px;right:-14px;
+  width:44px;height:44px;
+  background:var(--primary);border:3px solid var(--black);
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  z-index:2;
+}
+.verse-deco-circle .material-icons{font-size:22px;color:var(--black)}
+.verse-deco-square{
+  position:absolute;top:-10px;left:-10px;
+  width:28px;height:28px;
+  background:var(--accent);border:3px solid var(--black);
+  border-radius:4px;z-index:2;transform:rotate(8deg);
+}
+/* ACTION BUTTONS */
+.actions{
+  display:flex;gap:12px;justify-content:center;
+  margin:28px 0 16px;flex-wrap:wrap;
+}
+.act-btn{
+  background:var(--card-bg);border:var(--border);
+  width:60px;height:60px;border-radius:var(--radius);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:2px;cursor:pointer;
+  box-shadow:var(--shadow-green);
+  transition:all .15s;position:relative;
+  font-family:var(--font-body);
+}
+.act-btn:active{transform:translate(4px,4px);box-shadow:none}
+.act-btn .material-icons{font-size:24px;color:var(--black)}
+.act-btn span.label{font-size:0.6rem;font-weight:700;color:var(--black)}
+.act-btn.kakao{background:#FEE500}
+.act-btn.bookmark-active{background:var(--primary)}
+.act-btn.dark-btn{background:var(--black);box-shadow:4px 4px 0 var(--primary)}
+.act-btn.dark-btn .material-icons{color:var(--white)}
+.act-btn.dark-btn span.label{color:var(--white)}
+/* MAIN CTA */
+.cta-wrap{margin-top:auto;position:relative;z-index:10;padding-bottom:8px}
+.cta-btn{
+  width:100%;
+  background:var(--primary);border:3px solid var(--black);
+  color:var(--black);font-family:var(--font-title);
+  font-size:1.25rem;padding:18px;border-radius:var(--radius);
+  box-shadow:6px 6px 0 var(--white);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:all .15s;letter-spacing:1px;
+}
+.cta-btn:active{transform:translate(4px,4px);box-shadow:none}
+.cta-btn:hover{background:var(--primary-dark)}
+.cta-btn .material-icons{font-size:24px}
+.footer-text{
+  text-align:center;font-size:0.7rem;
+  color:rgba(0,0,0,0.3);font-weight:700;
+  margin-top:12px;letter-spacing:2px;text-transform:uppercase;
+}
+/* TOAST */
+.toast{
+  position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--black);color:var(--primary);
+  padding:12px 24px;border-radius:8px;border:2px solid var(--primary);
+  font-weight:700;font-size:0.9rem;
+  opacity:0;transition:all .3s;pointer-events:none;z-index:999;
+  white-space:nowrap;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+/* LOGIN MODAL */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.6);
+  display:none;align-items:center;justify-content:center;
+  z-index:100;padding:20px;
+}
+.modal-overlay.show{display:flex}
+.modal{
+  background:var(--bg);border:3px solid var(--black);
+  border-radius:var(--radius);padding:32px 24px;
+  width:100%;max-width:360px;
+  box-shadow:8px 8px 0 var(--primary);
+  position:relative;
+}
+.modal-title{
+  font-family:var(--font-title);font-size:1.5rem;
+  text-align:center;margin-bottom:8px;
+}
+.modal-sub{text-align:center;font-size:0.85rem;color:#666;margin-bottom:24px}
+.modal-input{
+  width:100%;padding:14px;border:var(--border);
+  border-radius:8px;font-size:1rem;
+  font-family:var(--font-body);
+  background:var(--white);outline:none;
+  margin-bottom:16px;
+}
+.modal-input:focus{box-shadow:var(--shadow-green)}
+.modal-submit{
+  width:100%;padding:14px;
+  background:var(--primary);border:var(--border);
+  border-radius:8px;font-family:var(--font-title);
+  font-size:1.1rem;cursor:pointer;
+  box-shadow:var(--shadow-black);transition:all .15s;
+}
+.modal-submit:active{transform:translate(4px,4px);box-shadow:none}
+.modal-close{
+  position:absolute;top:12px;right:12px;
+  background:none;border:none;cursor:pointer;font-size:24px;
+  color:var(--black);
+}
+/* BOOKMARKS PANEL */
+.bm-panel{
+  position:fixed;bottom:0;left:0;right:0;
+  background:var(--bg);border-top:3px solid var(--black);
+  border-radius:20px 20px 0 0;
+  max-height:70vh;overflow-y:auto;
+  transform:translateY(100%);transition:transform .35s ease;
+  z-index:90;padding:24px 20px 40px;
+  box-shadow:0 -4px 20px rgba(0,0,0,0.15);
+}
+.bm-panel.show{transform:translateY(0)}
+.bm-handle{
+  width:40px;height:4px;background:var(--black);
+  border-radius:2px;margin:0 auto 20px;opacity:0.3;
+}
+.bm-title{
+  font-family:var(--font-title);font-size:1.3rem;
+  margin-bottom:16px;display:flex;align-items:center;gap:8px;
+}
+.bm-empty{
+  text-align:center;color:#999;padding:40px 0;font-size:0.9rem;
+}
+.bm-item{
+  background:var(--white);border:var(--border);
+  border-radius:8px;padding:14px;margin-bottom:10px;
+  box-shadow:3px 3px 0 var(--primary);position:relative;
+}
+.bm-item-ref{
+  font-size:0.7rem;font-weight:700;
+  background:var(--black);color:var(--white);
+  display:inline-block;padding:2px 8px;border-radius:10px;
+  margin-bottom:6px;
+}
+.bm-item-text{font-size:0.9rem;line-height:1.5;word-break:keep-all}
+.bm-item-del{
+  position:absolute;top:10px;right:10px;
+  background:none;border:none;cursor:pointer;
+  color:#ccc;font-size:20px;
+}
+.bm-item-del:hover{color:#f44}
+.bm-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.3);
+  z-index:89;display:none;
+}
+.bm-overlay.show{display:block}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="header">
+    <div class="brand">✝ 오늘의 말씀</div>
+    <button class="user-btn" id="userBtn" onclick="handleUserBtn()">
+      <span class="material-icons">person</span>
+      <span id="userLabel">로그인</span>
+    </button>
+  </header>
+
+  <section class="verse-section">
+    <article class="verse-card" id="verseCard">
+      <div class="verse-deco-square"></div>
+      <span class="verse-ref" id="verseRef">로딩중...</span>
+      <div class="verse-text" id="verseText">말씀을 불러오는 중...</div>
+      <div class="verse-deco-circle">
+        <span class="material-icons">format_quote</span>
+      </div>
+    </article>
+
+    <div class="actions">
+      <button class="act-btn dark-btn" onclick="showRandomVerse()" title="랜덤">
+        <span class="material-icons">shuffle</span>
+        <span class="label">랜덤</span>
+      </button>
+      <button class="act-btn" onclick="copyVerse()" title="복사">
+        <span class="material-icons">content_copy</span>
+        <span class="label">복사</span>
+      </button>
+      <button class="act-btn kakao" onclick="shareKakao()" title="카카오톡">
+        <span class="material-icons">chat_bubble</span>
+        <span class="label">카톡</span>
+      </button>
+      <button class="act-btn" id="bmBtn" onclick="handleBookmark()" title="북마크">
+        <span class="material-icons" id="bmIcon">bookmark_border</span>
+        <span class="label">저장</span>
+      </button>
+    </div>
+  </section>
+
+  <div class="cta-wrap">
+    <button class="cta-btn" onclick="showRandomVerse()">
+      다음 말씀 받기 <span class="material-icons">arrow_forward</span>
+    </button>
+    <p class="footer-text">NFC로 만나는 매일의 양식</p>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="modal-overlay" id="loginModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeLogin()">&times;</button>
+    <div class="modal-title">👋 반가워요!</div>
+    <p class="modal-sub">북마크 기능을 위해 닉네임을 입력해주세요</p>
+    <input class="modal-input" id="nickInput" type="text" placeholder="닉네임 입력" maxlength="12" autocomplete="off"/>
+    <button class="modal-submit" onclick="doLogin()">시작하기</button>
+  </div>
+</div>
+
+<div class="bm-overlay" id="bmOverlay" onclick="closeBookmarks()"></div>
+<div class="bm-panel" id="bmPanel">
+  <div class="bm-handle"></div>
+  <div class="bm-title"><span class="material-icons">bookmark</span> 내 북마크</div>
+  <div id="bmList"></div>
+</div>
+
+<script>
+// ===== BIBLE VERSES DATA =====
+const V=[
+["창세기 1:1","태초에 하나님이 천지를 창조하시니라"],
+["창세기 1:27","하나님이 자기 형상 곧 하나님의 형상대로 사람을 창조하시되 남자와 여자를 창조하시고"],
+["창세기 12:2","내가 너로 큰 민족을 이루고 네게 복을 주어 네 이름을 창대하게 하리니 너는 복이 될지라"],
+["창세기 28:15","내가 너와 함께 있어 네가 어디로 가든지 너를 지키며 너를 이끌어 이 땅으로 돌아오게 할지라"],
+["출애굽기 14:14","여호와께서 너희를 위하여 싸우시리니 너희는 가만히 있을지니라"],
+["출애굽기 15:2","여호와는 나의 힘이요 노래시며 나의 구원이시로다"],
+["신명기 6:5","너는 마음을 다하고 뜻을 다하고 힘을 다하여 네 하나님 여호와를 사랑하라"],
+["신명기 31:6","강하고 담대하라 두려워하지 말라 그들 앞에서 떨지 말라 네 하나님 여호와 그가 너와 함께 행하시며 너를 떠나지 아니하시며 버리지 아니하시리라"],
+["신명기 31:8","여호와 그가 네 앞서 행하시며 너와 함께 하시며 너를 떠나지 아니하시며 버리지 아니하시리니 두려워하지 말라 놀라지 말라"],
+["여호수아 1:9","내가 네게 명한 것이 아니냐 강하고 담대하라 두려워하지 말며 놀라지 말라 네가 어디로 가든지 네 하나님 여호와가 너와 함께 하느니라"],
+["사사기 6:12","여호와께서 너와 함께 계시도다 큰 용사여"],
+["사무엘상 16:7","여호와는 사람이 보는 것처럼 보지 아니하나니 사람은 외모를 보거니와 여호와는 중심을 보느니라"],
+["시편 1:1","복 있는 사람은 악인의 꾀를 따르지 아니하며 죄인의 길에 서지 아니하며 오만한 자의 자리에 앉지 아니하고"],
+["시편 16:11","주께서 생명의 길을 내게 보이시리니 주의 앞에는 충만한 기쁨이 있고 주의 오른쪽에는 영원한 즐거움이 있나이다"],
+["시편 19:14","여호와여 나의 반석이시요 나의 구속자이시여 내 입의 말과 마음의 묵상이 주 앞에 열납되기를 원하나이다"],
+["시편 23:1","여호와는 나의 목자시니 내게 부족함이 없으리로다"],
+["시편 23:4","내가 사망의 음침한 골짜기로 다닐지라도 해를 두려워하지 않을 것은 주께서 나와 함께 하심이라"],
+["시편 27:1","여호와는 나의 빛이요 나의 구원이시니 내가 누구를 두려워하리요"],
+["시편 27:4","내가 여호와께 바라는 한 가지 일 그것을 구하리니 곧 내가 내 평생에 여호와의 집에 살면서 여호와의 아름다움을 바라보며 그의 성전에서 사모하는 그것이라"],
+["시편 34:8","너희는 여호와의 선하심을 맛보아 알지어다 그에게 피하는 자는 복이 있도다"],
+["시편 37:4","또 여호와를 기뻐하라 그가 네 마음의 소원을 네게 이루어 주시리로다"],
+["시편 37:5","네 길을 여호와께 맡기라 그를 의지하면 그가 이루시리로다"],
+["시편 46:1","하나님은 우리의 피난처시요 힘이시니 환난 중에 만날 큰 도움이시라"],
+["시편 46:10","이르시기를 너희는 가만히 있어 내가 하나님 됨을 알지어다"],
+["시편 51:10","하나님이여 내 속에 정한 마음을 창조하시고 내 안에 정직한 영을 새롭게 하소서"],
+["시편 55:22","네 짐을 여호와께 맡기라 그가 너를 붙드시리니 의인의 요동함을 영원히 허락하지 아니하시리로다"],
+["시편 91:1","지존자의 은밀한 곳에 거주하는 자는 전능자의 그늘 아래에 살리로다"],
+["시편 91:11","그가 너를 위하여 그의 천사들을 명령하사 네 모든 길에서 너를 지키게 하심이라"],
+["시편 100:5","여호와는 선하시니 그의 인자하심이 영원하고 그의 성실하심이 대대에 이르리로다"],
+["시편 103:1","내 영혼아 여호와를 송축하라 내 속에 있는 것들아 다 그의 거룩한 이름을 송축하라"],
+["시편 118:24","이 날은 여호와께서 만드신 것이라 이 날에 우리가 즐거워하고 기뻐하리로다"],
+["시편 119:105","주의 말씀은 내 발에 등이요 내 길에 빛이니이다"],
+["시편 121:1-2","내가 산을 향하여 눈을 들리라 나의 도움이 어디서 올까 나의 도움이 천지를 지으신 여호와에게서로다"],
+["시편 139:14","내가 주께 감사하옴은 나를 지으심이 심히 기묘하심이라 주께서 하시는 일이 기이함을 내 영혼이 잘 아나이다"],
+["시편 145:18","여호와께서는 자기에게 간구하는 모든 자 곧 진실하게 간구하는 모든 자에게 가까이 하시는도다"],
+["시편 150:6","호흡이 있는 자마다 여호와를 찬양할지어다 할렐루야"],
+["잠언 3:5-6","너는 마음을 다하여 여호와를 신뢰하고 네 명철을 의지하지 말라 너는 범사에 그를 인정하라 그리하면 네 길을 지도하시리라"],
+["잠언 4:23","모든 지킬 만한 것 중에 더욱 네 마음을 지키라 생명의 근원이 이에서 남이니라"],
+["잠언 16:3","너의 행사를 여호와께 맡기라 그리하면 네가 경영하는 것이 이루어지리라"],
+["잠언 16:9","사람이 마음으로 자기의 길을 계획할지라도 그의 걸음을 인도하시는 이는 여호와시니라"],
+["잠언 22:6","마땅히 행할 길을 아이에게 가르치라 그리하면 늙어도 그것을 떠나지 아니하리라"],
+["전도서 3:1","범사에 기한이 있고 천하 만사가 다 때가 있나니"],
+["전도서 3:11","하나님이 모든 것을 지으시되 때를 따라 아름답게 하셨고 또 사람들에게는 영원을 사모하는 마음을 주셨느니라"],
+["이사야 6:8","내가 또 주의 목소리를 들으니 이르시되 내가 누구를 보내며 누가 우리를 위하여 갈꼬 하시니 그때에 내가 이르되 내가 여기 있나이다 나를 보내소서"],
+["이사야 40:31","오직 여호와를 앙망하는 자는 새 힘을 얻으리니 독수리가 날개치며 올라감 같을 것이요 달려도 곤비하지 아니하겠고 걸어도 피곤하지 아니하리로다"],
+["이사야 41:10","두려워하지 말라 내가 너와 함께 함이라 놀라지 말라 나는 네 하나님이 됨이라 내가 너를 굳세게 하리라 참으로 너를 도와주리라 참으로 나의 의로운 오른손으로 너를 붙들리라"],
+["이사야 43:1","야곱아 너를 창조하신 여호와께서 이제 말씀하시느니라 이스라엘아 너를 지으신 이가 말씀하시느니라 두려워하지 말라 내가 너를 구속하였고 내가 너를 지명하여 불렀나니 너는 내 것이라"],
+["이사야 43:19","보라 내가 새 일을 행하리니 이제 나타낼 것이라 너희가 그것을 알지 못하겠느냐 반드시 길을 광야에 만들며 사막에 강을 내리라"],
+["이사야 53:5","그가 찔림은 우리의 허물 때문이요 그가 상함은 우리의 죄악 때문이라 그가 징계를 받으므로 우리는 평화를 누리고 그가 채찍에 맞으므로 우리는 나음을 받았도다"],
+["이사야 55:8-9","이는 내 생각이 너희의 생각과 다르며 내 길은 너희의 길과 다름이니라 하늘이 땅보다 높음같이 내 길은 너희의 길보다 높으며 내 생각은 너희의 생각보다 높으니라"],
+["예레미야 29:11","여호와의 말씀이니라 너희를 향한 나의 생각을 내가 아나니 평안이요 재앙이 아니니라 너희에게 미래와 희망을 주는 것이니라"],
+["예레미야 33:3","너는 내게 부르짖으라 내가 네게 응답하겠고 네가 알지 못하는 크고 은밀한 일을 네게 보이리라"],
+["애가 3:22-23","여호와의 인자와 긍휼이 무궁하시므로 우리가 진멸되지 아니함이니이다 이것들이 아침마다 새로우니 주의 성실하심이 크시도소이다"],
+["미가 6:8","사람아 주께서 선한 것이 무엇임을 네게 보이셨나니 여호와께서 네게 구하시는 것은 오직 정의를 행하며 인자를 사랑하며 겸손하게 네 하나님과 함께 행하는 것이 아니냐"],
+["마태복음 5:14","너희는 세상의 빛이라 산 위에 있는 동네가 숨겨지지 못할 것이요"],
+["마태복음 6:33","너희는 먼저 그의 나라와 그의 의를 구하라 그리하면 이 모든 것을 너희에게 더하시리라"],
+["마태복음 6:34","그러므로 내일 일을 위하여 염려하지 말라 내일 일은 내일이 염려할 것이요 한 날의 괴로움은 그 날로 족하니라"],
+["마태복음 7:7","구하라 그리하면 너희에게 주실 것이요 찾으라 그리하면 찾아낼 것이요 문을 두드리라 그리하면 너희에게 열릴 것이니"],
+["마태복음 11:28","수고하고 무거운 짐 진 자들아 다 내게로 오라 내가 너희를 쉬게 하리라"],
+["마태복음 19:26","사람으로는 할 수 없으나 하나님으로서는 다 할 수 있느니라"],
+["마태복음 28:20","내가 세상 끝날까지 너희와 항상 함께 있으리라"],
+["마가복음 9:23","할 수 있거든이 무슨 말이냐 믿는 자에게는 능히 하지 못할 일이 없느니라"],
+["마가복음 10:27","사람에게는 할 수 없으되 하나님에게는 그렇지 아니하니 하나님은 다 하실 수 있느니라"],
+["마가복음 11:24","무엇이든지 기도하고 구하는 것은 받은 줄로 믿으라 그리하면 너희에게 그대로 되리라"],
+["누가복음 1:37","대저 하나님의 모든 말씀은 능하지 못하심이 없느니라"],
+["누가복음 6:31","남에게 대접을 받고자 하는 대로 너희도 남을 대접하라"],
+["요한복음 1:1","태초에 말씀이 계시니라 이 말씀이 하나님과 함께 계셨으니 이 말씀은 곧 하나님이시니라"],
+["요한복음 3:16","하나님이 세상을 이처럼 사랑하사 독생자를 주셨으니 이는 그를 믿는 자마다 멸망하지 않고 영생을 얻게 하려 하심이라"],
+["요한복음 8:12","나는 세상의 빛이니 나를 따르는 자는 어둠에 다니지 아니하고 생명의 빛을 얻으리라"],
+["요한복음 8:32","진리를 알지니 진리가 너희를 자유롭게 하리라"],
+["요한복음 10:10","내가 온 것은 양으로 생명을 얻게 하고 더 풍성히 얻게 하려는 것이라"],
+["요한복음 11:25","나는 부활이요 생명이니 나를 믿는 자는 죽어도 살겠고"],
+["요한복음 13:34","새 계명을 너희에게 주노니 서로 사랑하라 내가 너희를 사랑한 것 같이 너희도 서로 사랑하라"],
+["요한복음 14:6","내가 곧 길이요 진리요 생명이니 나로 말미암지 않고는 아버지께로 올 자가 없느니라"],
+["요한복음 14:27","평안을 너희에게 끼치노니 곧 나의 평안을 너희에게 주노라 내가 너희에게 주는 것은 세상이 주는 것과 같지 아니하니라 너희는 마음에 근심하지도 말고 두려워하지도 말라"],
+["요한복음 15:5","나는 포도나무요 너희는 가지라 그가 내 안에 내가 그 안에 거하면 사람이 열매를 많이 맺나니 나를 떠나서는 너희가 아무것도 할 수 없음이라"],
+["요한복음 16:33","이것을 너희에게 이르는 것은 너희로 내 안에서 평안을 누리게 하려 함이라 세상에서는 너희가 환난을 당하나 담대하라 내가 세상을 이기었노라"],
+["사도행전 1:8","오직 성령이 너희에게 임하시면 너희가 권능을 받고 예루살렘과 온 유대와 사마리아와 땅끝까지 이르러 내 증인이 되리라"],
+["로마서 1:16","내가 복음을 부끄러워하지 아니하노니 이 복음은 모든 믿는 자에게 구원을 주시는 하나님의 능력이 됨이라"],
+["로마서 5:8","우리가 아직 죄인 되었을 때에 그리스도께서 우리를 위하여 죽으심으로 하나님께서 우리에 대한 자기의 사랑을 확증하셨느니라"],
+["로마서 8:1","그러므로 이제 그리스도 예수 안에 있는 자에게는 결코 정죄함이 없나니"],
+["로마서 8:18","현재의 고난은 장차 우리에게 나타날 영광과 비교할 수 없도다"],
+["로마서 8:28","우리가 알거니와 하나님을 사랑하는 자 곧 그의 뜻대로 부르심을 입은 자들에게는 모든 것이 합력하여 선을 이루느니라"],
+["로마서 8:31","만일 하나님이 우리를 위하시면 누가 우리를 대적하리요"],
+["로마서 8:38-39","사망이나 생명이나 천사들이나 권세자들이나 현재 일이나 장래 일이나 능력이나 어떤 피조물이라도 우리를 우리 주 그리스도 예수 안에 있는 하나님의 사랑에서 끊을 수 없으리라"],
+["로마서 10:17","그러므로 믿음은 들음에서 나며 들음은 그리스도의 말씀으로 말미암았느니라"],
+["로마서 12:2","너희는 이 세대를 본받지 말고 오직 마음을 새롭게 함으로 변화를 받아 하나님의 선하시고 기뻐하시고 온전하신 뜻이 무엇인지 분별하도록 하라"],
+["로마서 12:12","소망 중에 즐거워하며 환난 중에 참으며 기도에 항상 힘쓰라"],
+["로마서 15:13","소망의 하나님이 모든 기쁨과 평강을 믿음 안에서 너희에게 충만하게 하사 성령의 능력으로 소망이 넘치게 하시기를 원하노라"],
+["고린도전서 10:13","사람이 감당할 시험 밖에는 너희에게 당한 것이 없나니 오직 하나님은 미쁘사 너희가 감당하지 못할 시험 당함을 허락하지 아니하시고"],
+["고린도전서 13:4-7","사랑은 오래 참고 사랑은 온유하며 시기하지 아니하며 사랑은 자랑하지 아니하며 교만하지 아니하며"],
+["고린도전서 13:13","그런즉 믿음 소망 사랑 이 세 가지는 항상 있을 것인데 그 중의 제일은 사랑이라"],
+["고린도전서 16:13","깨어 믿음에 굳건히 서고 남자답게 강건하여라"],
+["고린도후서 4:18","우리가 주목하는 것은 보이는 것이 아니요 보이지 않는 것이니 보이는 것은 잠깐이요 보이지 않는 것은 영원함이라"],
+["고린도후서 5:7","이는 우리가 믿음으로 행하고 보는 것으로 행하지 아니함이로라"],
+["고린도후서 5:17","그런즉 누구든지 그리스도 안에 있으면 새로운 피조물이라 이전 것은 지나갔으니 보라 새것이 되었도다"],
+["고린도후서 12:9","내 은혜가 네게 족하도다 이는 내 능력이 약한 데서 온전하여짐이라"],
+["갈라디아서 2:20","내가 그리스도와 함께 십자가에 못 박혔나니 그런즉 이제는 내가 사는 것이 아니요 오직 내 안에 그리스도께서 사시는 것이라"],
+["갈라디아서 5:22-23","오직 성령의 열매는 사랑과 희락과 화평과 오래 참음과 자비와 양선과 충성과 온유와 절제니"],
+["갈라디아서 6:9","우리가 선을 행하되 낙심하지 말지니 포기하지 아니하면 때가 이르매 거두리라"],
+["에베소서 2:8-9","너희는 그 은혜에 의하여 믿음으로 말미암아 구원을 받았으니 이것은 너희에게서 난 것이 아니요 하나님의 선물이라"],
+["에베소서 2:10","우리는 그가 만드신 바라 그리스도 예수 안에서 선한 일을 위하여 지으심을 받은 자니"],
+["에베소서 3:20","우리 가운데서 역사하시는 능력대로 우리가 구하거나 생각하는 모든 것에 더 넘치도록 능히 하실 이에게"],
+["에베소서 4:32","서로 인자하게 하며 불쌍히 여기며 서로 용서하기를 하나님이 그리스도 안에서 너희를 용서하심과 같이 하라"],
+["에베소서 6:10","주 안에서와 그 힘의 능력으로 강건하여지라"],
+["빌립보서 1:6","너희 안에서 착한 일을 시작하신 이가 그리스도 예수의 날까지 이루실 줄을 우리는 확신하노라"],
+["빌립보서 2:13","너희 안에서 행하시는 이는 하나님이시니 자기의 기쁘신 뜻을 위하여 너희에게 소원을 두고 행하게 하시나니"],
+["빌립보서 4:4","주 안에서 항상 기뻐하라 내가 다시 말하노니 기뻐하라"],
+["빌립보서 4:6-7","아무 것도 염려하지 말고 다만 모든 일에 기도와 간구로 너희 구할 것을 감사함으로 하나님께 아뢰라 그리하면 모든 지각에 뛰어난 하나님의 평강이 그리스도 예수 안에서 너희 마음과 생각을 지키시리라"],
+["빌립보서 4:13","내게 능력 주시는 자 안에서 내가 모든 것을 할 수 있느니라"],
+["빌립보서 4:19","나의 하나님이 그리스도 예수 안에서 영광 가운데 그 풍성한 대로 너희 모든 쓸 것을 채우시리라"],
+["골로새서 3:2","위의 것을 생각하고 땅의 것을 생각하지 말라"],
+["골로새서 3:23","무슨 일을 하든지 마음을 다하여 주께 하듯 하고 사람에게 하듯 하지 말라"],
+["데살로니가전서 5:16-18","항상 기뻐하라 쉬지 말고 기도하라 범사에 감사하라 이것이 그리스도 예수 안에서 너희를 향하신 하나님의 뜻이니라"],
+["디모데후서 1:7","하나님이 우리에게 주신 것은 두려워하는 마음이 아니요 오직 능력과 사랑과 절제하는 마음이니"],
+["디모데후서 4:7","나는 선한 싸움을 싸우고 나의 달려갈 길을 마치고 믿음을 지켰으니"],
+["히브리서 4:16","그러므로 우리는 긍휼하심을 받고 때를 따라 돕는 은혜를 얻기 위하여 은혜의 보좌 앞에 담대히 나아갈 것이니라"],
+["히브리서 11:1","믿음은 바라는 것들의 실상이요 보이지 않는 것들의 증거니"],
+["히브리서 11:6","믿음이 없이는 하나님을 기쁘시게 하지 못하나니 하나님께 나아가는 자는 반드시 그가 계신 것과 또한 그가 자기를 찾는 자들에게 상 주시는 이심을 믿어야 할지니라"],
+["히브리서 12:1","이러므로 우리에게 구름같이 둘러싼 하든 많은 증인들이 있으니 모든 무거운 것과 얽매이기 쉬운 죄를 벗어 버리고 인내로써 우리 앞에 당한 경주를 하자"],
+["히브리서 12:2","믿음의 주요 또 온전하게 하시는 이인 예수를 바라보자"],
+["히브리서 13:5","돈을 사랑하지 말고 있는 바를 족한 줄로 알라 그가 친히 말씀하시기를 내가 결코 너를 버리지 아니하고 너를 떠나지 아니하리라 하셨느니라"],
+["히브리서 13:8","예수 그리스도는 어제나 오늘이나 영원토록 동일하시니라"],
+["야고보서 1:2-3","내 형제들아 너희가 여러 가지 시험을 당하거든 온전히 기쁘게 여기라 이는 너희 믿음의 시련이 인내를 만들어 내는 줄 너희가 앎이라"],
+["야고보서 1:5","너희 중에 누구든지 지혜가 부족하거든 모든 사람에게 후히 주시고 꾸짖지 아니하시는 하나님께 구하라 그리하면 주시리라"],
+["야고보서 4:8","하나님을 가까이하라 그리하면 너희를 가까이하시리라"],
+["베드로전서 2:9","너희는 택하신 족속이요 왕 같은 제사장들이요 거룩한 나라요 그의 소유가 된 백성이니"],
+["베드로전서 5:7","너희 염려를 다 주께 맡기라 이는 그가 너희를 돌보심이라"],
+["요한일서 1:9","만일 우리가 우리 죄를 자백하면 그는 미쁘시고 의로우사 우리 죄를 사하시며 우리를 모든 불의에서 깨끗하게 하실 것이요"],
+["요한일서 4:7","사랑하는 자들아 우리가 서로 사랑하자 사랑은 하나님께 속한 것이니 사랑하는 자마다 하나님으로부터 나서 하나님을 알고"],
+["요한일서 4:18","사랑 안에 두려움이 없고 온전한 사랑이 두려움을 내쫓나니"],
+["요한일서 4:19","우리가 사랑함은 그가 먼저 우리를 사랑하셨음이라"],
+["요한일서 5:4","대저 하나님께로부터 난 자마다 세상을 이기느니라 세상을 이기는 승리는 이것이니 우리의 믿음이니라"],
+["요한계시록 3:20","볼지어다 내가 문 밖에 서서 두드리노니 누구든지 내 음성을 듣고 문을 열면 내가 그에게로 들어가 그와 더불어 먹고 그는 나와 더불어 먹으리라"],
+["요한계시록 21:4","모든 눈물을 그 눈에서 닦아 주시니 다시는 사망이 없고 애통하는 것이나 곡하는 것이나 아픈 것이 다시 있지 아니하리니"]
+];
+
+// ===== STATE =====
+let currentVerse=null;
+let user=localStorage.getItem('nfc_bible_user')||null;
+
+function init(){
+  updateUserUI();
+  showRandomVerse();
+  try{Kakao.init('YOUR_KAKAO_JS_KEY')}catch(e){}
+}
+
+function showRandomVerse(){
+  const card=document.getElementById('verseCard');
+  card.classList.add('flip');
+  setTimeout(()=>{
+    const idx=Math.floor(Math.random()*V.length);
+    currentVerse={ref:V[idx][0],text:V[idx][1]};
+    document.getElementById('verseRef').textContent=currentVerse.ref;
+    document.getElementById('verseText').textContent=currentVerse.text;
+    updateBookmarkIcon();
+    setTimeout(()=>card.classList.remove('flip'),250);
+  },200);
+}
+
+function copyVerse(){
+  if(!currentVerse)return;
+  const t=`"${currentVerse.text}"\n— ${currentVerse.ref}`;
+  navigator.clipboard.writeText(t).then(()=>toast('📋 복사 완료!')).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=t;
+    document.body.appendChild(ta);ta.select();document.execCommand('copy');
+    document.body.removeChild(ta);toast('📋 복사 완료!');
+  });
+}
+
+function shareKakao(){
+  if(!currentVerse)return;
+  if(typeof Kakao==='undefined'||!Kakao.isInitialized()){
+    toast('⚠️ 카카오 SDK 초기화 필요');return;
+  }
+  try{
+    Kakao.Share.sendDefault({
+      objectType:'text',
+      text:`✝️ ${currentVerse.ref}\n\n"${currentVerse.text}"`,
+      link:{mobileWebUrl:location.href,webUrl:location.href}
+    });
+  }catch(e){toast('⚠️ 공유 실패: '+e.message)}
+}
+
+function handleBookmark(){
+  if(!user){openLogin();return}
+  if(!currentVerse)return;
+  const key='nfc_bm_'+user;
+  let bm=JSON.parse(localStorage.getItem(key)||'[]');
+  const exists=bm.findIndex(b=>b.ref===currentVerse.ref);
+  if(exists>-1){bm.splice(exists,1);toast('🗑️ 북마크 삭제');
+  }else{bm.unshift({ref:currentVerse.ref,text:currentVerse.text,ts:Date.now()});toast('⭐ 북마크 저장!')}
+  localStorage.setItem(key,JSON.stringify(bm));
+  updateBookmarkIcon();
+}
+
+function updateBookmarkIcon(){
+  const icon=document.getElementById('bmIcon');
+  if(!user||!currentVerse){icon.textContent='bookmark_border';return}
+  const bm=JSON.parse(localStorage.getItem('nfc_bm_'+user)||'[]');
+  icon.textContent=bm.some(b=>b.ref===currentVerse.ref)?'bookmark':'bookmark_border';
+  document.getElementById('bmBtn').classList.toggle('bookmark-active',icon.textContent==='bookmark');
+}
+
+function handleUserBtn(){
+  if(user){showBookmarks()}else{openLogin()}
+}
+
+function openLogin(){document.getElementById('loginModal').classList.add('show')}
+function closeLogin(){document.getElementById('loginModal').classList.remove('show')}
+
+function doLogin(){
+  const nick=document.getElementById('nickInput').value.trim();
+  if(!nick){toast('닉네임을 입력해주세요');return}
+  user=nick;localStorage.setItem('nfc_bible_user',nick);
+  closeLogin();updateUserUI();updateBookmarkIcon();toast('👋 환영합니다, '+nick+'!');
+}
+
+function logout(){
+  user=null;localStorage.removeItem('nfc_bible_user');
+  updateUserUI();updateBookmarkIcon();closeBookmarks();toast('👋 로그아웃 완료');
+}
+
+function updateUserUI(){
+  const lbl=document.getElementById('userLabel');
+  const btn=document.getElementById('userBtn');
+  if(user){lbl.textContent=user;btn.querySelector('.material-icons').textContent='menu'}
+  else{lbl.textContent='로그인';btn.querySelector('.material-icons').textContent='person'}
+}
+
+function showBookmarks(){
+  if(!user){openLogin();return}
+  const bm=JSON.parse(localStorage.getItem('nfc_bm_'+user)||'[]');
+  const list=document.getElementById('bmList');
+  if(bm.length===0){
+    list.innerHTML='<div class="bm-empty">아직 북마크가 없어요 📖<br>말씀 카드에서 ⭐ 저장 버튼을 눌러보세요!</div>';
+  }else{
+    list.innerHTML=bm.map((b,i)=>`
+      <div class="bm-item">
+        <button class="bm-item-del" onclick="delBookmark(${i})"><span class="material-icons">close</span></button>
+        <div class="bm-item-ref">${b.ref}</div>
+        <div class="bm-item-text">${b.text}</div>
+      </div>`).join('');
+  }
+  list.innerHTML+=`<button style="width:100%;margin-top:16px;padding:12px;background:none;border:2px solid #ccc;border-radius:8px;cursor:pointer;font-family:var(--font-body);color:#999;font-size:0.85rem" onclick="logout()">로그아웃</button>`;
+  document.getElementById('bmPanel').classList.add('show');
+  document.getElementById('bmOverlay').classList.add('show');
+}
+
+function closeBookmarks(){
+  document.getElementById('bmPanel').classList.remove('show');
+  document.getElementById('bmOverlay').classList.remove('show');
+}
+
+function delBookmark(idx){
+  const key='nfc_bm_'+user;
+  let bm=JSON.parse(localStorage.getItem(key)||'[]');
+  bm.splice(idx,1);localStorage.setItem(key,JSON.stringify(bm));
+  showBookmarks();updateBookmarkIcon();toast('🗑️ 삭제됨');
+}
+
+function toast(msg){
+  const t=document.getElementById('toast');t.textContent=msg;
+  t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000);
+}
+
+document.addEventListener('DOMContentLoaded',init);
+</script>
+</body>
+</html>
