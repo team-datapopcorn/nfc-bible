@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Neo-Brutalism Bible Verse Screen</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&amp;family=Black+Han+Sans&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0df20d",
+                        "background-light": "#f5f8f5",
+                        "background-dark": "#102210",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"],
+                        "korean": ["Black Han Sans", "sans-serif"], // Adding a chunky Korean font
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    boxShadow: {
+                        "neo": "4px 4px 0px 0px #0df20d", // Neon green shadow for white cards
+                        "neo-dark": "4px 4px 0px 0px #000000", // Black shadow for colored buttons
+                        "neo-hard": "4px 4px 0px 0px #ffffff", // White shadow for dark elements
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom styles for that extra punchy look */
+        .text-outline {
+            text-shadow: 
+                -1px -1px 0 #000,  
+                1px -1px 0 #000,
+                -1px 1px 0 #000,
+                1px 1px 0 #000;
+        }
+        
+        .korean-text {
+            line-height: 1.4;
+            word-break: keep-all;
+        }
+
+        /* Brutalist button press effect */
+        .btn-press:active {
+            transform: translate(4px, 4px);
+            box-shadow: 0px 0px 0px 0px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen font-display flex justify-center overflow-hidden">
+<!-- Mobile Container -->
+<main class="w-full max-w-md h-[100dvh] relative flex flex-col p-6 overflow-y-auto">
+<!-- Background Decorative Elements (Subtle Grid) -->
+<div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: radial-gradient(#0df20d 1px, transparent 1px); background-size: 20px 20px;">
+</div>
+<!-- Top HUD Bar -->
+<header class="flex justify-between items-center mb-8 relative z-10">
+<!-- Soul Level Badge -->
+<div class="bg-black border-2 border-primary text-primary px-4 py-2 rounded-lg shadow-neo font-bold text-sm tracking-wider uppercase flex items-center gap-2">
+<span class="material-icons text-base">verified</span>
+<span>Lvl 3 Soul</span>
+</div>
+<!-- Streak Counter -->
+<div class="bg-primary border-2 border-black text-black px-4 py-2 rounded-lg shadow-neo-hard font-bold text-sm flex items-center gap-2 transform rotate-2">
+<span class="material-icons text-base">local_fire_department</span>
+<span>12 Days</span>
+</div>
+</header>
+<!-- Main Content Area -->
+<div class="flex-1 flex flex-col justify-center items-center relative z-10">
+<!-- Verse Card -->
+<article class="w-full bg-white border-[3px] border-black rounded-xl p-6 shadow-[8px_8px_0px_0px_#0df20d] relative mb-12 transform -rotate-1">
+<!-- Card Header: Reference & Tag -->
+<div class="flex justify-between items-start mb-6">
+<span class="bg-black text-white px-3 py-1 rounded-full text-xs font-bold border-2 border-primary uppercase tracking-widest">
+                        Psalm 23:1
+                    </span>
+<button class="text-black hover:text-primary transition-colors">
+<span class="material-icons">more_horiz</span>
+</button>
+</div>
+<!-- Verse Text (Korean) -->
+<h1 class="font-korean text-4xl text-black font-black text-center mb-8 korean-text leading-tight">
+                    여호와는<br/>나의 목자시니<br/>내게 부족함이<br/>없으리로다
+                </h1>
+<!-- Decorative elements inside card -->
+<div class="absolute -bottom-3 -right-3 w-12 h-12 bg-primary border-[3px] border-black rounded-full flex items-center justify-center z-20">
+<span class="material-icons text-black text-2xl">format_quote</span>
+</div>
+<div class="absolute -top-3 -left-3 w-8 h-8 bg-yellow-400 border-[3px] border-black rounded-sm z-20"></div>
+</article>
+<!-- Action Cluster -->
+<div class="flex gap-4 mb-8 w-full justify-center">
+<!-- Save Button -->
+<button class="group relative btn-press transition-transform">
+<div class="bg-gray-800 border-2 border-primary text-white w-14 h-14 rounded-lg flex items-center justify-center shadow-[4px_4px_0px_0px_#0df20d]">
+<span class="material-icons group-hover:scale-110 transition-transform">bookmark</span>
+</div>
+</button>
+<!-- Share Button -->
+<button class="group relative btn-press transition-transform">
+<div class="bg-white border-2 border-black text-black w-14 h-14 rounded-lg flex items-center justify-center shadow-[4px_4px_0px_0px_#0df20d]">
+<span class="material-icons group-hover:scale-110 transition-transform">ios_share</span>
+</div>
+</button>
+<!-- Copy Button -->
+<button class="group relative btn-press transition-transform">
+<div class="bg-gray-800 border-2 border-primary text-white w-14 h-14 rounded-lg flex items-center justify-center shadow-[4px_4px_0px_0px_#0df20d]">
+<span class="material-icons group-hover:scale-110 transition-transform">content_copy</span>
+</div>
+</button>
+</div>
+</div>
+<!-- Footer CTA -->
+<footer class="mt-auto relative z-10 pb-4">
+<button class="w-full bg-primary border-[3px] border-black text-black font-bold text-xl py-5 rounded-xl shadow-[6px_6px_0px_0px_#ffffff] btn-press uppercase tracking-wider flex items-center justify-center gap-3 transition-all hover:bg-[#0be00b]">
+                Next Word
+                <span class="material-icons font-bold">arrow_forward</span>
+</button>
+<p class="text-center text-primary/40 text-xs mt-6 font-bold uppercase tracking-widest">
+                Tap for daily bread
+            </p>
+</footer>
+</main>
+</body></html>
